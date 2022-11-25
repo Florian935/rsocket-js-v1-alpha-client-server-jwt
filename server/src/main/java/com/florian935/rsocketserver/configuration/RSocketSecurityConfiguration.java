@@ -33,10 +33,12 @@ public class RSocketSecurityConfiguration {
     @Bean
     PayloadSocketAcceptorInterceptor authorization(RSocketSecurity rSocketSecurity) {
 
+        // See https://docs.spring.io/spring-security/site/docs/5.2.0.RELEASE/reference/html/rsocket.html
         return rSocketSecurity
                 .authorizePayload(authorize -> authorize
-                                .anyRequest().authenticated()
-                                .anyExchange().permitAll()
+                        .route("product.request.response.{id}").permitAll()
+                        .anyRequest().authenticated()
+                        .anyExchange().permitAll()
                 )
                 .jwt(jwtSpec -> jwtSpec.authenticationManager(jwtReactiveAuthenticationManager()))
                 .build();

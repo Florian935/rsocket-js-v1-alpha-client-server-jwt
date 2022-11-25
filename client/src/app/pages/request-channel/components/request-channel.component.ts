@@ -19,7 +19,7 @@ export class RequestChannelComponent
     ngOnInit(): void {
         this.addSub(
             this._rsocketService
-                .requestChannel(of('1', '2', '3', '4', '5'), 'request.channel')
+                .requestChannel(of(1, 2, 3, 4, 5), 'product.channel')
                 .subscribe(console.log)
         );
     }

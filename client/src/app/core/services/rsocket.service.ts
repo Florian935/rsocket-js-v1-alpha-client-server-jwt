@@ -11,14 +11,18 @@ import { StringCodec } from 'src/app/shared/models/string-codec.model';
 import { RxRequestersFactory } from 'rsocket-adapter-rxjs';
 import { Product } from 'src/app/shared/interfaces/product.interface';
 import { ModelCodec } from 'src/app/shared/models/model-codec.model';
+import { NumberCodec } from 'src/app/shared/models/number-codec.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class RsocketService {
     private _stringCodec = new StringCodec();
+    private _numberCodec = new NumberCodec();
     private _rsocket$!: Observable<RSocket>;
     private _rsocketRequester$!: Observable<RSocketRequester>;
+    private _jwtToken =
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjY5MzM3NTE5LCJqdGkiOiI4ZmQwN2RlMy1mOWY1LTQ3MjAtODNhNC0zNGNjNjU4OWE0ODUifQ.cWVlIQIcNcfrqOLskHIKF0eeqiaw1_1qYUijANr0QGLVkRBE5OPSvnpeSEsFBt_DBvMj5ZiLfwQfOohooScHdg';
 
     constructor() {
         this._makeRSocketRequester();
@@ -57,6 +61,10 @@ export class RsocketService {
             mergeMap((requester: RSocketRequester) =>
                 requester
                     .route(route)
+                    .metadata(
+                        WellKnownMimeType.MESSAGE_RSOCKET_AUTHENTICATION,
+                        encodeBearerAuthMetadata(this._jwtToken)
+                    )
                     .request(
                         RxRequestersFactory.fireAndForget(
                             data,
@@ -74,9 +82,7 @@ export class RsocketService {
                     .route(route)
                     .metadata(
                         WellKnownMimeType.MESSAGE_RSOCKET_AUTHENTICATION,
-                        encodeBearerAuthMetadata(
-                            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjY5MzM1NjM4LCJqdGkiOiJhMjMwN2RiMS03OTNjLTRjNGQtYjExZS0xOTA4YWY2OWY0N2UifQ.oMbD1Yb2FcX7t1_TNuS73jwKarGmJudDnZUX_sTsEqEn_cQzb6WZyBTmyNt1_jzM5qsEPZQGq82V7HNsummdzg'
-                        )
+                        encodeBearerAuthMetadata(this._jwtToken)
                     )
                     .request(
                         RxRequestersFactory.requestResponse(
@@ -89,47 +95,20 @@ export class RsocketService {
         );
     }
 
-    requestResponseWithPayload(
-        data: Partial<Product>,
-        route: string
-    ): Observable<Partial<Product>> {
-        return this._rsocketRequester$.pipe(
-            mergeMap((requester: RSocketRequester) =>
-                this._requestResponseBuilder<Partial<Product>>(
-                    requester,
-                    route,
-                    data
-                )
-            )
-        );
-    }
-
-    private _requestResponseBuilder<T>(
-        requester: RSocketRequester,
-        route: string,
-        data: T
-    ): Observable<T> {
-        return requester
-            .route(route)
-            .request(
-                RxRequestersFactory.requestResponse(
-                    data,
-                    new ModelCodec<T>(),
-                    new ModelCodec<T>()
-                )
-            );
-    }
-
-    requestStream(payload: string, route: string): Observable<string> {
+    requestStream(payload: string[], route: string): Observable<Product> {
         return this._rsocketRequester$.pipe(
             mergeMap((requester: RSocketRequester) =>
                 requester
                     .route(route)
+                    .metadata(
+                        WellKnownMimeType.MESSAGE_RSOCKET_AUTHENTICATION,
+                        encodeBearerAuthMetadata(this._jwtToken)
+                    )
                     .request(
                         RxRequestersFactory.requestStream(
                             payload,
-                            this._stringCodec,
-                            this._stringCodec
+                            new ModelCodec<string[]>(),
+                            new ModelCodec<Product>()
                         )
                     )
             )
@@ -137,18 +116,22 @@ export class RsocketService {
     }
 
     requestChannel(
-        datas: Observable<string>,
+        datas: Observable<number>,
         route: string
-    ): Observable<string> {
+    ): Observable<number> {
         return this._rsocketRequester$.pipe(
             mergeMap((requester: RSocketRequester) =>
                 requester
                     .route(route)
+                    .metadata(
+                        WellKnownMimeType.MESSAGE_RSOCKET_AUTHENTICATION,
+                        encodeBearerAuthMetadata(this._jwtToken)
+                    )
                     .request(
                         RxRequestersFactory.requestChannel(
                             datas,
-                            this._stringCodec,
-                            this._stringCodec,
+                            this._numberCodec,
+                            this._numberCodec,
                             5
                         )
                     )

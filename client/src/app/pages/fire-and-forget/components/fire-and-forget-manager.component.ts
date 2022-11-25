@@ -33,7 +33,10 @@ export class FireAndForgetManagerComponent
 
         this.addSub(
             this._rsocketService
-                .fireAndForget('fireAndForget', 'fire.and.forget')
+                .fireAndForget(
+                    'fireAndForget works !',
+                    'product.fire.and.forget'
+                )
                 .subscribe(console.log)
         );
     }

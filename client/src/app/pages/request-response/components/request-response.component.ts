@@ -24,14 +24,5 @@ export class RequestResponseComponent
                 )
                 .subscribe(console.log)
         );
-
-        // this.addSub(
-        //     this._rsocketService
-        //         .requestResponseWithPayload(
-        //             { label: 'PC', price: 1000 },
-        //             'request.response.1'
-        //         )
-        //         .subscribe(console.log)
-        // );
     }
 }

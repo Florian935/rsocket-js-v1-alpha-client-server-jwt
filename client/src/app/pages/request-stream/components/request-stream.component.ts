@@ -18,7 +18,10 @@ export class RequestStreamComponent
     ngOnInit(): void {
         this.addSub(
             this._rsocketService
-                .requestStream('## [RequestStream] hello', 'request.stream')
+                .requestStream(
+                    ['1', '2', '3', '4', '5'],
+                    'product.request.stream'
+                )
                 .subscribe(console.log)
         );
     }
